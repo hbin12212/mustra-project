@@ -15,7 +15,7 @@ new instance의 attribute값과 다르면 0, 같으면 1
 ## KD-tree
 tree 형태로 O(logN) 시간에 class값을 찾을 수 있다.
 
-![KD-tree](C:\Users\sg051\OneDrive\문서\GitHub\DataMining\KD-tree.PNG)
+![KD-tree](./img/KD-tree.PNG)
 
 > 하지만 위의 그림과 같이 더 가까운 것으로 분류 되지 않고 다른 instance값으로 분류가 되는 경우가 있다.
 
