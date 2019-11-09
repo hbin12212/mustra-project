@@ -7,18 +7,18 @@ xpoints = np.arange(0,100,10)
 ypoints = [np.arange(10), np.arange(10)**2, np.random.choice(100, size = 10)]
 
 ## 선 옵션 설정
-styles = ['dashed', 'dashdot', 'dotted']
+styles = ['dashed', 'dashed', 'dashed']
 colors = ['deepskyblue', 'mediumseagreen','hotpink']
 widths = [2, 2, 2]
 
-## 선 그래프 그리기
+## 출력할 이미지 크기
 plt.figure(figsize=(8, 5))
 
-## 그래프 크기 ( 단위 = inch )
+## 점찍기 (그래프 그리기)
 for i in range(len(ypoints)):
     plt.plot(xpoints, ypoints[i], linestyle = styles[i], color = colors[i], linewidth = widths[i])
 
-## 그래프 옵션 설정하기
+## 그래프 이름 설정
 plt.title("Learning Curves")
 plt.xlabel("instance")
 plt.ylabel("accuracy")
