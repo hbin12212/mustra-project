@@ -46,4 +46,4 @@ plt.show()
 ~~~
 > 출력하고 이미지파일 저장
 
-![LearningCurve](./img/LearningCurves)
+![LearningCurve](./img/LearningCurves.png)
