@@ -10,6 +10,7 @@ new instance의 attribute값과 다르면 0, 같으면 1
 ~~~
 
 > 모든 instance들과 new instance를 비교해서 값이 가장 작은 instance의 class 값으로 new instance의 class 값을 결정한다.
+
 > 효율적인 알고리즘이 아니다.
 
 ## KD-tree
