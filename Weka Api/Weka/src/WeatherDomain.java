@@ -7,27 +7,15 @@ import weka.classifiers.bayes.NaiveBayes;
 import weka.classifiers.trees.J48;
 import weka.classifiers.rules.OneR;
 
+// 프로그램 개발 환경: Java로 만들어진 Weka api를 사용하기 위해서 eclipse 를 이용해 java로 
+// weatherdomain_numeric data을 oneR, decisiontree, naivebayes 3가지 알고리즘으로 각각 학습시켰다.
+
 public class WeatherDomain {	 
 	public static void main(String[] args) throws Exception {
 		// TODO Auto-generated method stub
 		DataSource source = new DataSource("/Program Files/Weka-3-8/data/weather.numeric.arff");
-		Instances trainDataset = source.getDataSet(); //weather domain data file dml dataset을 가져온다.
+		Instances trainDataset = source.getDataSet(); // weka의 api를 이용하여 weather domain data file의  dataset을 가져온다.
 		trainDataset.setClassIndex(trainDataset.numAttributes() - 1);
-		
-		System.out.println("=======   Attributes   ======="); //weather domain의 attribute들을 출력한다.
-		for(int i=0;i<trainDataset.numAttributes();i++) {
-			if(trainDataset.attribute(i).isNumeric()) { //numeric일 경우 min값 max삾을 출력한다.
-				String name = trainDataset.attribute(i).name();
-				System.out.println("@attribute "+name);
-				double minN = trainDataset.attributeStats(i).numericStats.min;
-				double maxN = trainDataset.attributeStats(i).numericStats.max;
-				System.out.printf("Min: %f, Max: %f\n",minN,maxN);
-			}
-			else {
-				System.out.println(trainDataset.attribute(i));
-			}
-		}
-		System.out.println(" ");
 		
 		Scanner sc = new Scanner(System.in);
 		System.out.println("====== Classifier Select ======"); //분류할 떄 사용할 알고리즘을 선택한다.
@@ -40,33 +28,43 @@ public class WeatherDomain {
 		
 		if (algo == 1) { //OneR일 경우
 			OneR oneR = new OneR();
-			oneR.buildClassifier(trainDataset); //OneR로 학습을 시킨다.
-			System.out.println("===== Classifier output =====");
+			oneR.buildClassifier(trainDataset); //OneR로 학습을 시킨다. 
+			System.out.println("===== Classifier output ====="); //결과로 얻은 지식베이스 구축
 			System.out.println(oneR); // oneR 의 분류 결과를 출력한다.
 			System.out.println("  ");
-		    Evaluation oneREval = new Evaluation(trainDataset); //
+		    Evaluation oneREval = new Evaluation(trainDataset); 
 		    oneREval.crossValidateModel(oneR, trainDataset, 10, new Random(1));
 		    System.out.println(oneREval.toSummaryString());//10 fold로 학습시킨 결과를 출력한다.
 		    
-			System.out.println("====== Input New Instance ======");
-			System.out.print("Outlook : ");
-			String outlook = sc.next();
-			System.out.print("Temperature : ");
-			int temperature = sc.nextInt();
-			System.out.print("Humidity : ");
-			int humidity = sc.nextInt();
-			System.out.print("Windy : ");
-			String windy = sc.next();
+			System.out.println("====== Input New Instance ======");// 새로운 데이터 입력
+			Instance newInst = trainDataset.instance(0); 
+			for(int i=0;i<trainDataset.numAttributes()-1;i++) {
+				if(trainDataset.attribute(i).isNumeric()) { //numeric일 경우 min값 max삾을 출력한다.
+					String name = trainDataset.attribute(i).name();
+					System.out.println("<"+ name +">");
+					double minN = trainDataset.attributeStats(i).numericStats.min;
+					double maxN = trainDataset.attributeStats(i).numericStats.max;
+					System.out.printf("( Min: %f, Max: %f )\n",minN,maxN);
+					int att = sc.nextInt();
+					newInst.setValue(i, att);
+				}
+				else {// nominal일 경우 속성값들 출력
+					String name = trainDataset.attribute(i).name();
+					System.out.println("<"+ name +">");
+					System.out.print("( ");
+					for(int j=0;j<trainDataset.attribute(i).numValues();j++) {
+					System.out.print(trainDataset.attribute(i).value(j)+" ");
+					}
+					System.out.printf(")\n");
+					String attr = sc.next();
+					newInst.setValue(i, attr);
+				}
+			}
 
-			Instance newInst = trainDataset.instance(0); //입력한 new instance 를 넣어서
-			newInst.setValue(0, outlook);
-			newInst.setValue(1, temperature);
-			newInst.setValue(2, humidity);
-			newInst.setValue(3, windy);
 			double predNB = oneR.classifyInstance(newInst); // new instance에 대한 class 값을 예측한다.
 			String predString = trainDataset.classAttribute().value((int) predNB);
-			System.out.println("==============================");
-			System.out.println("Play : " + predString); //
+			System.out.println("======== 예측 결과 ========");
+			System.out.println("Play : " + predString); 
 		}
 		
 		else if (algo == 2) { //J48일 경우
@@ -78,30 +76,38 @@ public class WeatherDomain {
 		    treeEval.crossValidateModel(tree, trainDataset, 10, new Random(1)); //10 fold로 학습시킨 결과를 출력한다.
 		    System.out.println(treeEval.toSummaryString());
 		    System.out.println("  ");
-			System.out.println("====== Input New Instance ======");// 새로운 instance를 입력한다.
-
-			System.out.print("Outlook : ");
-			String outlook = sc.next();
-			System.out.print("Temperature : ");
-			int temperature = sc.nextInt();
-			System.out.print("Humidity : ");
-			int humidity = sc.nextInt();
-			System.out.print("Windy : ");
-			String windy = sc.next();
-			
-			Instance newInst = trainDataset.instance(0);
-			newInst.setValue(0, outlook);
-			newInst.setValue(1, temperature);
-			newInst.setValue(2, humidity);
-			newInst.setValue(3, windy);
-			double predNB = tree.classifyInstance(newInst);
+			System.out.println("====== Input New Instance ======");
+			Instance newInst = trainDataset.instance(0); //입력한 new instance 를 넣어서
+			for(int i=0;i<trainDataset.numAttributes()-1;i++) {
+				if(trainDataset.attribute(i).isNumeric()) { //numeric일 경우 min값 max삾을 출력한다.
+					String name = trainDataset.attribute(i).name();
+					System.out.println("<"+ name +">");
+					double minN = trainDataset.attributeStats(i).numericStats.min;
+					double maxN = trainDataset.attributeStats(i).numericStats.max;
+					System.out.printf("( Min: %f, Max: %f )\n",minN,maxN);
+					int att = sc.nextInt();
+					newInst.setValue(i, att);
+				}
+				else {// nominal일 경우 해당 속성의 값들을 출력
+					String name = trainDataset.attribute(i).name();
+					System.out.println("<"+ name +">");
+					System.out.print("( ");
+					for(int j=0;j<trainDataset.attribute(i).numValues();j++) {
+					System.out.print(trainDataset.attribute(i).value(j)+" ");
+					}
+					System.out.printf(")\n");
+					String attr = sc.next();
+					newInst.setValue(i, attr);
+				}
+			}
+			double predNB = tree.classifyInstance(newInst);// new instance 학습
 			String predString = trainDataset.classAttribute().value((int) predNB);
-			System.out.println("==============================");
+			System.out.println("======== 예측 결과 ========");
 			System.out.println("Play : " + predString);
 		} 
 		
 		else if (algo == 3) {// naiveBayes로 학습시킨 경우
-			int numClasses = trainDataset.numClasses(); //위의 2 알고리즘들과 코드 설명이 동일하다.
+			int numClasses = trainDataset.numClasses(); //위의  알고리즘들과 코드 설명이 동일하다.
 			
 			NaiveBayes nb = new NaiveBayes();
 			nb.buildClassifier(trainDataset);
@@ -113,24 +119,32 @@ public class WeatherDomain {
 		    System.out.println("  ");
 			
 			System.out.println("====== Input New Instance ======");
-
-			System.out.print("Outlook : ");
-			String outlook = sc.next();
-			System.out.print("Temperature : ");
-			int temperature = sc.nextInt();
-			System.out.print("Humidity : ");
-			int humidity = sc.nextInt();
-			System.out.print("Windy : ");
-			String windy = sc.next();
-
-			Instance newInst = trainDataset.instance(0);
-			newInst.setValue(0, outlook);
-			newInst.setValue(1, temperature);
-			newInst.setValue(2, humidity);
-			newInst.setValue(3, windy);
+			Instance newInst = trainDataset.instance(0); 
+			for(int i=0;i<trainDataset.numAttributes()-1;i++) {
+				if(trainDataset.attribute(i).isNumeric()) { 
+					String name = trainDataset.attribute(i).name();
+					System.out.println("<"+ name +">");
+					double minN = trainDataset.attributeStats(i).numericStats.min;
+					double maxN = trainDataset.attributeStats(i).numericStats.max;
+					System.out.printf("( Min: %f, Max: %f )\n",minN,maxN);
+					int att = sc.nextInt();
+					newInst.setValue(i, att);
+				}
+				else {
+					String name = trainDataset.attribute(i).name();
+					System.out.println("<"+ name +">");
+					System.out.print("( ");
+					for(int j=0;j<trainDataset.attribute(i).numValues();j++) {
+					System.out.print(trainDataset.attribute(i).value(j)+" ");
+					}
+					System.out.printf(")\n");
+					String attr = sc.next();
+					newInst.setValue(i, attr);
+				}
+			}
 			double predNB = nb.classifyInstance(newInst);
 			String predString = trainDataset.classAttribute().value((int) predNB);
-			System.out.println("==============================");
+			System.out.println("======== 예측 결과 ========");
 			System.out.println("Play : " + predString);
 		}
 	}
